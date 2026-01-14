@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full flex items-center justify-center p-4">
+  <div class="w-full max-w-lg">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Mening Vazifalarim</h1>
+
+      <form method="POST" action="{% url 'task_list' %}" class="flex gap-3 mb-8">
+        {% csrf_token %}
+          <input type="text" name="task_title"  placeholder="Yangi vazifa kiriting..." class="flex-1 px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" autocomplete="off" required>
+        <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition transform hover:scale-105 active:scale-95">Qo'shish</button>
+      </form>
+
+      <ul id="taskList" class="space-y-3">
+          {% for task in tasks %}
+            <li class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+
+                <div class="flex items-center gap-4 flex-1">
+                    <form method="POST" action="{% url 'toggle_task' task.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="w-6 h-6 rounded-full border-2 transition
+                            {% if task.completed %}
+                                bg-green-500 border-green-500 text-white
+                            {% else %}
+                                border-gray-300 hover:border-blue-500
+                            {% endif %}"
+                        >
+                            {% if task.completed %}
+                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <span class="text-gray-700 text-lg font-medium
+                        {% if task.completed %}
+                            line-through text-gray-400
+                        {% endif %}">
+                        {{ task.title }}
+                    </span>
+                </div>
+
+                <form method="POST" action="{% url 'delete_task' task.id %}" class="ml-4">
+                    {% csrf_token %}
+                    <button type="submit" class="text-gray-400 hover:text-red-500 transition"
+                            title="O'chirish">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </form>
+            </li>
+          {% endfor %}
+      </ul>
+
+      {% if not tasks %}
+          <div id="emptyState" class="text-center py-12 text-gray-400">
+            <svg class="mx-auto h-16 w-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <p class="text-lg">Hozircha vazifa yo'q. Yangi vazifa qo'shing!</p>
+          </div>
+      {% endif %}
+    </div>
+
+    <p class="text-center text-sm text-gray-500 mt-6">
+      Saqlanadi: **PostgreSQL/SQLite** • <span id="taskCount">{{ tasks|length }}</span> ta vazifa
+    </p>
+  </div>
+</body>
+</html>
